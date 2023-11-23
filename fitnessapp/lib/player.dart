@@ -16,8 +16,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(
-      widget.workoutDetails?['videoUrl'] ?? '',
+    _controller = VideoPlayerController.asset(
+      widget.workoutDetails?['lib/assets/vidwo.mp4'] ?? '',
     )..initialize().then((_) {
         _controller.setLooping(true); // Set the video to loop
         _controller.play(); // Start playing the video
@@ -34,7 +34,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Workout Player'),
+        title: const Text('Workout'),
       ),
       body: Center(
         child: Column(

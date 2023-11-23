@@ -91,8 +91,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       },
                       child: Chip(
                         label: Text(day),
-                        backgroundColor:
-                            selectedDay == day ? Colors.blue : Colors.grey,
+                        backgroundColor: selectedDay == day
+                            ? Colors.blue
+                            : Colors.lightBlue.withOpacity(0.25),
                       ),
                     ),
                   ),

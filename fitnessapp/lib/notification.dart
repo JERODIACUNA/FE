@@ -33,7 +33,7 @@ class _NotificationListState extends State<NotificationList> {
     NotificationItem(
         DateTime(2023, 11, 22), 'Upgrade Now For A Premium FE Account'),
     NotificationItem(
-        DateTime(2023, 11, 22), 'Good Job Finishing All The Exercise'),
+        DateTime(2023, 11, 22), 'Good Job Finishing All The Exercises'),
   ];
 
   @override

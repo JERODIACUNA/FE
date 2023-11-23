@@ -50,12 +50,12 @@ class _InformationState extends State<Information> {
               ),
               const TextField(
                 decoration: InputDecoration(
-                  labelText: 'Height',
+                  labelText: 'Height(cm)',
                 ),
               ),
               const TextField(
                 decoration: InputDecoration(
-                  labelText: 'Weight',
+                  labelText: 'Weight(kg)',
                 ),
               ),
               const SizedBox(

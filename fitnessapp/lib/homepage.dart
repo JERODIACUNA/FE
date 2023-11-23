@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fitnessapp/player.dart'; // Replace with the correct import path
 import 'activity.dart';
 import 'notification.dart';
+import 'about_us.dart';
+import 'settings.dart';
 
 void main() {
   runApp(HomePage());
@@ -130,6 +132,7 @@ class _HomePageState extends State<HomePage> {
       ),
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.blue.withOpacity(0.9),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.menu),
@@ -198,7 +201,15 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.lightBlue.withOpacity(0.25),
                       child: const ListTile(
                         leading: Icon(Icons.calendar_today),
-                        title: Text('This Week\'s Activity'),
+                        title: Text(
+                          'This Week\'s Activity',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         subtitle: Text('8.00 AM - 11.30 AM'),
                       ),
                     ),
@@ -297,10 +308,17 @@ class RecommendationClass extends StatelessWidget {
   }
 }
 
-class CategoriesRow extends StatelessWidget {
+class CategoriesRow extends StatefulWidget {
   final Function(String) onCategorySelected;
 
   const CategoriesRow({required this.onCategorySelected});
+
+  @override
+  _CategoriesRowState createState() => _CategoriesRowState();
+}
+
+class _CategoriesRowState extends State<CategoriesRow> {
+  String selectedCategory = '';
 
   @override
   Widget build(BuildContext context) {
@@ -323,25 +341,50 @@ class CategoriesRow extends StatelessWidget {
           child: Row(
             children: [
               CategoryItem(
-                  title: 'Aerobic Exercise', onSelected: onCategorySelected),
+                title: 'Aerobic Exercise',
+                onSelected: onCategorySelected,
+                isSelected: selectedCategory == 'Aerobic Exercise',
+              ),
               CategoryItem(
-                  title: 'Strength Training', onSelected: onCategorySelected),
-              CategoryItem(title: 'Stretching', onSelected: onCategorySelected),
+                title: 'Strength Training',
+                onSelected: onCategorySelected,
+                isSelected: selectedCategory == 'Strength Training',
+              ),
               CategoryItem(
-                  title: 'Balance Exercise', onSelected: onCategorySelected),
+                title: 'Stretching',
+                onSelected: onCategorySelected,
+                isSelected: selectedCategory == 'Stretching',
+              ),
+              CategoryItem(
+                title: 'Balance Exercise',
+                onSelected: onCategorySelected,
+                isSelected: selectedCategory == 'Balance Exercise',
+              ),
             ],
           ),
         ),
       ],
     );
   }
+
+  void onCategorySelected(String category) {
+    setState(() {
+      selectedCategory = category;
+    });
+    widget.onCategorySelected(category);
+  }
 }
 
 class CategoryItem extends StatelessWidget {
   final String title;
   final Function(String) onSelected;
+  final bool isSelected;
 
-  const CategoryItem({required this.title, required this.onSelected});
+  const CategoryItem({
+    required this.title,
+    required this.onSelected,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +392,8 @@ class CategoryItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ActionChip(
         label: Text(title),
-        backgroundColor: Colors.lightBlue.withOpacity(0.25),
+        backgroundColor:
+            isSelected ? Colors.blue : Colors.lightBlue.withOpacity(0.25),
         onPressed: () {
           onSelected(title); // Notify selected category
         },
@@ -388,55 +432,117 @@ class HamburgerMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu'),
+        backgroundColor: Colors.blue.withOpacity(0.9),
+        title: const Text(
+          'Menu',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
       body: ListView(
         children: [
-          // UserAccountsDrawerHeader with default user info
+          // Updated UserAccountsDrawerHeader with user picture
           UserAccountsDrawerHeader(
-            accountName: Text(defaultUsername),
-            accountEmail: Text(defaultEmail),
-            currentAccountPicture: const CircleAvatar(
-              // You can add a default user picture here
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.account_circle,
-                size: 50,
-                color: Colors.blue,
+            accountName: Text(
+              defaultUsername,
+            ),
+            accountEmail: Text(
+              defaultEmail,
+            ),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('lib/assets/bocchibg.gif'),
+                fit: BoxFit.cover,
               ),
             ),
+            currentAccountPicture: const CircleAvatar(
+              backgroundImage: AssetImage('lib/assets/bochii.gif'),
+            ),
           ),
+
           ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About Us'),
+            leading: const Icon(Icons.settings),
+            title: const Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
-              // Implement navigation to the about us page
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note),
-            title: const Text('Plans'),
-            onTap: () {
-              // Implement navigation to the plans page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => SettingsScreen(),
+                ),
+              );
             },
           ),
           ListTile(
             leading: const Icon(Icons.chat_bubble),
-            title: const Text('Suggestions'),
+            title: const Text(
+              'Suggestions',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
               // Implement navigation to the suggestions page
             },
           ),
           ListTile(
             leading: const Icon(Icons.support),
-            title: const Text('Support'),
+            title: const Text(
+              'Support',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
               // Implement navigation to the support page
             },
           ),
           ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text(
+              'About Us',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => AboutUsScreen()),
+              );
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Log Out'),
+            title: const Text(
+              'Log Out',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
               Navigator.pushReplacement(
                   context,
