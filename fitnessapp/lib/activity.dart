@@ -82,7 +82,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   'Sun'
                 ])
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -158,7 +158,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
+                const Text(
                   'Afternoon Activity',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
