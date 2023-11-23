@@ -61,6 +61,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue.withOpacity(0.9),
         title: const Text('This Week\'s Activity'),
       ),
       body: Column(
