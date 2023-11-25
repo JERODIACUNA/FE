@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'sign_up.dart';
 import 'homepage.dart';
 
@@ -8,6 +9,52 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  void signIn() async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      if (userCredential.user != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        // Handle unsuccessful sign-in (invalid credentials, etc.)
+        // Show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid email or password'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
+      // Handle sign-in failure
+      // Show an error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Sign-in failed. Please try again.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,56 +70,50 @@ class _LoginState extends State<Login> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                width: 150, // Adjust the width as needed
-                height: 150, // Adjust the height as needed
+                width: 150,
+                height: 150,
                 child: Image.asset(
-                  'lib/assets/logo.png', // Replace with your image path
-                  fit: BoxFit.contain, // Ensure the image fits within the box
+                  'lib/assets/logo.png',
+                  fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(
-                  height: 0), // Add some space between image and text
+              const SizedBox(height: 24.0),
               const Text(
                 'Forever Endeavor',
                 style: TextStyle(
                   fontSize: 32.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue, // Change color as needed
-                  // You can apply custom fonts here using Google Fonts or local assets
-                  // fontFamily: 'YourCustomFont',
+                  color: Colors.blue,
                 ),
               ),
               const SizedBox(height: 24.0),
-              const TextField(
+              TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                 ),
               ),
-              const TextField(
+              TextField(
+                controller: passwordController,
+                obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
                 ),
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                },
+                onPressed: signIn,
                 child: const Text('Log In'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.blue, // Text color of the button
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 12.0), // Padding around the text
-                  textStyle:
-                      const TextStyle(fontSize: 16.0), // Font size of the text
+                    horizontal: 20.0,
+                    vertical: 12.0,
+                  ),
+                  textStyle: const TextStyle(fontSize: 16.0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        15.0), // Makes the button corners rounded
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
                 ),
               ),
@@ -86,9 +127,8 @@ class _LoginState extends State<Login> {
                 },
                 child: const Text('Create New Account'),
                 style: TextButton.styleFrom(
-                  primary: Colors.blue, // Text color of the button
-                  textStyle:
-                      const TextStyle(fontSize: 16.0), // Font size of the text
+                  primary: Colors.blue,
+                  textStyle: const TextStyle(fontSize: 16.0),
                 ),
               ),
             ],
