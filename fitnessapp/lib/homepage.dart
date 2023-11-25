@@ -5,6 +5,7 @@ import 'activity.dart';
 import 'notification.dart';
 import 'about_us.dart';
 import 'settings.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(HomePage());
@@ -424,6 +425,21 @@ void _navigateToHamburgerMenuPage(BuildContext context) {
 }
 
 class HamburgerMenuPage extends StatelessWidget {
+  void _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => Login()),
+        (route) => false, // This removes all the routes from the stack
+      );
+    } catch (e) {
+      print(e);
+      // Handle sign-out failure
+      // You can show an error message to the user here if needed
+    }
+  }
+
   // Default user information
   final String defaultUsername = 'Adol Filter';
   final String defaultEmail = 'adol@example.com';
@@ -543,12 +559,7 @@ class HamburgerMenuPage extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            onTap: () {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => Login()));
-            },
+            onTap: () => _signOut(context),
           ),
         ],
       ),

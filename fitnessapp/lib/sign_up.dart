@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'information.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'information.dart'; // Import your Information screen
 
 class SignUp extends StatefulWidget {
   @override
@@ -7,6 +8,39 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  void signUp() async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      if (userCredential.user != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Information(userCredential.user!)),
+        );
+      }
+    } catch (e) {
+      print(e);
+      // Handle sign-up failure
+      // You can show an error message to the user here
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,66 +55,50 @@ class _SignUpState extends State<SignUp> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                width: 150, // Adjust the width as needed
-                height: 150, // Adjust the height as needed
+                width: 150,
+                height: 150,
                 child: Image.asset(
-                  'lib/assets/logo.png', // Replace with your image path
-                  fit: BoxFit.contain, // Ensure the image fits within the box
+                  'lib/assets/logo.png',
+                  fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(
-                  height: 0), // Add some space between image and text
+              const SizedBox(height: 24.0),
               const Text(
                 'Forever Endeavor',
                 style: TextStyle(
                   fontSize: 32.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue, // Change color as needed
-                  // You can apply custom fonts here using Google Fonts or local assets
-                  // fontFamily: 'YourCustomFont',
+                  color: Colors.blue,
                 ),
               ),
               const SizedBox(height: 24.0),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'First Name',
-                ),
-              ),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Last Name',
-                ),
-              ),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                ),
-              ),
-              const TextField(
+              TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                 ),
               ),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                ),
+              ),
               const SizedBox(height: 24.0),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Information()),
-                  );
-                },
+                onPressed: signUp,
                 child: const Text('Sign Up'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.blue, // Text color of the button
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 12.0), // Padding around the text
-                  textStyle:
-                      const TextStyle(fontSize: 16.0), // Font size of the text
+                    horizontal: 20.0,
+                    vertical: 12.0,
+                  ),
+                  textStyle: const TextStyle(fontSize: 16.0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        15.0), // Makes the button corners rounded
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
                 ),
               ),
