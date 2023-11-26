@@ -21,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.withOpacity(0.9),
-        title: const Text('Profile Settings',
+        title: const Text('Settings',
             style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: ListView(
