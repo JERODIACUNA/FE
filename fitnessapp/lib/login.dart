@@ -4,6 +4,8 @@ import 'sign_up.dart';
 import 'homepage.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -77,10 +79,11 @@ class _LoginState extends State<Login> {
                   fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 0.0),
               const Text(
                 'Forever Endeavor',
                 style: TextStyle(
+                  fontFamily: 'Roboto',
                   fontSize: 32.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
@@ -111,7 +114,8 @@ class _LoginState extends State<Login> {
                     horizontal: 20.0,
                     vertical: 12.0,
                   ),
-                  textStyle: const TextStyle(fontSize: 16.0),
+                  textStyle:
+                      const TextStyle(fontFamily: 'Roboto', fontSize: 16.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
