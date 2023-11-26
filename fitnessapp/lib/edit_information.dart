@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'login.dart';
 
 class EditInformation extends StatefulWidget {
   final User user;
 
-  const EditInformation(this.user, {super.key});
+  const EditInformation(this.user, {Key? key}) : super(key: key);
 
   @override
   _EditInformationState createState() => _EditInformationState();
@@ -19,6 +20,7 @@ class _EditInformationState extends State<EditInformation> {
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   String? selectedSex; // Added for dropdown selection
+  bool userDeleted = false; // Track user deletion
 
   @override
   void initState() {
@@ -67,6 +69,50 @@ class _EditInformationState extends State<EditInformation> {
       print(e);
       // Handle error updating information
     }
+  }
+
+  void deleteUser(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete your account?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                try {
+                  // Delete user information document
+                  await firestore
+                      .collection('user_information')
+                      .doc(widget.user.uid)
+                      .delete();
+
+                  // Delete the user's Firebase authentication account
+                  await widget.user.delete();
+
+                  // Navigate back to loginscreen after successful deletion
+                  setState(() {
+                    userDeleted = true; // Update the user deletion status
+                  });
+                } catch (e) {
+                  print(e);
+                  // Handle error while deleting user or user information
+                }
+              },
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -134,8 +180,51 @@ class _EditInformationState extends State<EditInformation> {
               ),
               ElevatedButton(
                 onPressed: updateInformation,
-                child: const Text('Update'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Colors.blue.withOpacity(.9), // Change button color to red
+                ),
+                child: const Text(
+                  'Update',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  deleteUser(context); // Pass the context here
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(.9),
+                ),
+                child: const Text('Delete Account'),
+              ),
+              if (userDeleted) // Display the button only if user is deleted
+                Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      'Successfully deleted the account',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 70, 233, 255)
+                            .withOpacity(1),
+                      ),
+                      child: const Text('Back to Login'),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
