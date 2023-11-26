@@ -6,7 +6,7 @@ import 'homepage.dart'; // Import your Home screen
 class Information extends StatefulWidget {
   final User user;
 
-  Information(this.user);
+  const Information(this.user, {super.key});
 
   @override
   _InformationState createState() => _InformationState();
@@ -16,6 +16,7 @@ class _InformationState extends State<Information> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   String? selectedSex;
+  TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
@@ -23,6 +24,7 @@ class _InformationState extends State<Information> {
   void saveInformation() async {
     try {
       await firestore.collection('user_information').doc(widget.user.uid).set({
+        'name': nameController.text,
         'age': ageController.text,
         'height': heightController.text,
         'weight': weightController.text,
@@ -42,6 +44,7 @@ class _InformationState extends State<Information> {
 
   @override
   void dispose() {
+    nameController.dispose();
     ageController.dispose();
     heightController.dispose();
     weightController.dispose();
@@ -69,16 +72,23 @@ class _InformationState extends State<Information> {
                   fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 0.0),
               const Text(
                 'Forever Endeavor',
                 style: TextStyle(
+                  fontFamily: 'Roboto',
                   fontSize: 32.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
                 ),
               ),
               const SizedBox(height: 24.0),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                ),
+              ),
               TextField(
                 controller: ageController,
                 decoration: const InputDecoration(

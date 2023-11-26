@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'information.dart'; // Import your Information screen
 
 class SignUp extends StatefulWidget {
+  const SignUp({super.key});
+
   @override
   _SignUpState createState() => _SignUpState();
 }
@@ -62,10 +64,11 @@ class _SignUpState extends State<SignUp> {
                   fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 0.0),
               const Text(
                 'Forever Endeavor',
                 style: TextStyle(
+                  fontFamily: 'Roboto',
                   fontSize: 32.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
@@ -96,7 +99,8 @@ class _SignUpState extends State<SignUp> {
                     horizontal: 20.0,
                     vertical: 12.0,
                   ),
-                  textStyle: const TextStyle(fontSize: 16.0),
+                  textStyle:
+                      const TextStyle(fontFamily: 'Roboto', fontSize: 16.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),

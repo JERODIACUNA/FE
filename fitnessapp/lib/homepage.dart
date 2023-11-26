@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/login.dart';
 import 'package:flutter/material.dart';
-import 'package:fitnessapp/player.dart'; // Replace with the correct import path
+import 'package:fitnessapp/player.dart';
 import 'activity.dart';
 import 'notification.dart';
 import 'about_us.dart';
@@ -12,12 +13,56 @@ void main() {
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   String selectedCategory = ''; // Track the selected category
+
+  String defaultUsername = '';
+  String defaultEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Call a method to fetch the logged-in user's information
+    fetchUserData();
+    fetchUsername();
+  }
+
+  void fetchUserData() async {
+    // Retrieve the current user from Firebase Authentication
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // If the user is not null, update defaultEmail with user's email
+      setState(() {
+        defaultEmail = user.email ?? ''; // Assign the user's email
+      });
+    }
+  }
+
+  void fetchUsername() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Access Firestore collection to retrieve the user's name
+      DocumentSnapshot<Map<String, dynamic>> userData = await FirebaseFirestore
+          .instance
+          .collection('user_information')
+          .doc(user
+              .uid) // Assuming the user document ID is the same as the user's UID
+          .get();
+
+      if (userData.exists) {
+        setState(() {
+          defaultUsername = userData['name']; // Update defaultUsername
+        });
+      }
+    }
+  }
 
   List<Map<String, String>> workoutClasses = [
     {
@@ -118,6 +163,21 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  void _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => Login()),
+        (route) => false, // This removes all the routes from the stack
+      );
+    } catch (e) {
+      print(e);
+      // Handle sign-out failure
+      // You can show an error message to the user here if needed
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Map<String, String>> filteredClasses = selectedCategory.isNotEmpty
@@ -135,13 +195,21 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           backgroundColor: Colors.blue.withOpacity(0.9),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              _navigateToHamburgerMenuPage(context);
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
             },
           ),
-          title: const Text('Welcome, Adol'),
+          title: Builder(
+            builder: (BuildContext context) {
+              return Text('Welcome, $defaultUsername');
+            },
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.notifications),
@@ -161,6 +229,112 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                accountName: Text(
+                  defaultUsername,
+                ),
+                accountEmail: Text(
+                  defaultEmail,
+                ),
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('lib/assets/bocchibg.gif'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundImage: AssetImage('lib/assets/bochii.gif'),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => SettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.chat_bubble),
+                title: const Text(
+                  'Suggestions',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  // Implement navigation to the suggestions page
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.support),
+                title: const Text(
+                  'Support',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  // Implement navigation to the support page
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text(
+                  'About Us',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => AboutUsScreen()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text(
+                  'Log Out',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () => _signOut(context),
+              ),
+            ],
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -217,7 +391,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              RecommendationClass(), // New widget for recommendations
+              const RecommendationClass(), // New widget for recommendations
               const SizedBox(
                 height: 16,
               ), // Add space between recommendation and categories
@@ -268,6 +442,8 @@ class _HomePageState extends State<HomePage> {
 }
 
 class RecommendationClass extends StatelessWidget {
+  const RecommendationClass({super.key});
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -312,7 +488,7 @@ class RecommendationClass extends StatelessWidget {
 class CategoriesRow extends StatefulWidget {
   final Function(String) onCategorySelected;
 
-  const CategoriesRow({required this.onCategorySelected});
+  const CategoriesRow({super.key, required this.onCategorySelected});
 
   @override
   _CategoriesRowState createState() => _CategoriesRowState();
@@ -382,6 +558,7 @@ class CategoryItem extends StatelessWidget {
   final bool isSelected;
 
   const CategoryItem({
+    super.key,
     required this.title,
     required this.onSelected,
     required this.isSelected,
@@ -398,170 +575,6 @@ class CategoryItem extends StatelessWidget {
         onPressed: () {
           onSelected(title); // Notify selected category
         },
-      ),
-    );
-  }
-}
-
-void _navigateToHamburgerMenuPage(BuildContext context) {
-  Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        return HamburgerMenuPage();
-      },
-      transitionsBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation, Widget child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-                  begin: const Offset(-1.0, 0.0), end: const Offset(0.0, 0.0))
-              .animate(animation),
-          child: child,
-        );
-      },
-    ),
-  );
-}
-
-class HamburgerMenuPage extends StatelessWidget {
-  void _signOut(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Login()),
-        (route) => false, // This removes all the routes from the stack
-      );
-    } catch (e) {
-      print(e);
-      // Handle sign-out failure
-      // You can show an error message to the user here if needed
-    }
-  }
-
-  // Default user information
-  final String defaultUsername = 'Adol Filter';
-  final String defaultEmail = 'adol@example.com';
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue.withOpacity(0.9),
-        title: const Text(
-          'Menu',
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-      body: ListView(
-        children: [
-          // Updated UserAccountsDrawerHeader with user picture
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              defaultUsername,
-            ),
-            accountEmail: Text(
-              defaultEmail,
-            ),
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('lib/assets/bocchibg.gif'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            currentAccountPicture: const CircleAvatar(
-              backgroundImage: AssetImage('lib/assets/bochii.gif'),
-            ),
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => SettingsScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.chat_bubble),
-            title: const Text(
-              'Suggestions',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onTap: () {
-              // Implement navigation to the suggestions page
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.support),
-            title: const Text(
-              'Support',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onTap: () {
-              // Implement navigation to the support page
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text(
-              'About Us',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => AboutUsScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text(
-              'Log Out',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onTap: () => _signOut(context),
-          ),
-        ],
       ),
     );
   }
