@@ -29,7 +29,7 @@ class _LoginState extends State<Login> {
         // Handle unsuccessful sign-in (invalid credentials, etc.)
         // Show an error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Invalid email or password'),
             duration: Duration(seconds: 3),
           ),
@@ -40,7 +40,7 @@ class _LoginState extends State<Login> {
       // Handle sign-in failure
       // Show an error message to the user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Sign-in failed. Please try again.'),
           duration: Duration(seconds: 3),
         ),
@@ -89,14 +89,14 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 24.0),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email',
                 ),
               ),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Password',
                 ),
               ),
@@ -127,7 +127,7 @@ class _LoginState extends State<Login> {
                 },
                 child: const Text('Create New Account'),
                 style: TextButton.styleFrom(
-                  primary: Colors.blue,
+                  foregroundColor: Colors.blue,
                   textStyle: const TextStyle(fontSize: 16.0),
                 ),
               ),
