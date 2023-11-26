@@ -81,19 +81,19 @@ class _InformationState extends State<Information> {
               const SizedBox(height: 24.0),
               TextField(
                 controller: ageController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Age',
                 ),
               ),
               TextField(
                 controller: heightController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Height(cm)',
                 ),
               ),
               TextField(
                 controller: weightController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Weight(kg)',
                 ),
               ),
