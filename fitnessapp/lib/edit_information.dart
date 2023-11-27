@@ -128,6 +128,7 @@ class _EditInformationState extends State<EditInformation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue.withOpacity(0.9),
         title: const Text('Edit Information'),
       ),
       body: SingleChildScrollView(
