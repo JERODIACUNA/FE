@@ -14,6 +14,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'Personal Information': true,
     'Fitness Goals': true,
     'Fitness Level': true,
+    'Notification Preferences': true,
+    'Privacy Settings': true,
+    'Sync with Wearable Devices': true,
+    'Theme/Interface Customizations': true,
+    'Language': true,
+    'Data Sync and Backup': true,
   };
 
   @override
