@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -131,104 +132,122 @@ class _EditInformationState extends State<EditInformation> {
         backgroundColor: Colors.blue.withOpacity(0.9),
         title: const Text('Edit Information'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                ),
-              ),
-              TextField(
-                controller: ageController,
-                decoration: const InputDecoration(
-                  labelText: 'Age',
-                ),
-              ),
-              TextField(
-                controller: heightController,
-                decoration: const InputDecoration(
-                  labelText: 'Height(cm)',
-                ),
-              ),
-              TextField(
-                controller: weightController,
-                decoration: const InputDecoration(
-                  labelText: 'Weight(kg)',
-                ),
-              ),
-              DropdownButtonFormField<String>(
-                value: selectedSex,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedSex = newValue;
-                  });
-                },
-                items: ['Male', 'Female']
-                    .map((sex) => DropdownMenuItem<String>(
-                          value: sex,
-                          child: Text(sex),
-                        ))
-                    .toList(),
-                decoration: const InputDecoration(
-                  labelText: 'Sex',
-                ),
-              ),
-              ElevatedButton(
-                onPressed: updateInformation,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.blue.withOpacity(.9), // Change button color to red
-                ),
-                child: const Text(
-                  'Update',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  deleteUser(context); // Pass the context here
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(.9),
-                ),
-                child: const Text('Delete Account'),
-              ),
-              if (userDeleted) // Display the button only if user is deleted
-                Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      'Successfully deleted the account',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: IgnorePointer(
+                ignoring:
+                    userDeleted, // Disable interaction when userDeleted is true
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                      ),
+                    ),
+                    TextField(
+                      controller: ageController,
+                      decoration: const InputDecoration(
+                        labelText: 'Age',
+                      ),
+                    ),
+                    DropdownButtonFormField<String>(
+                      value: selectedSex,
+                      onChanged: (newValue) {
+                        setState(() {
+                          selectedSex = newValue;
+                        });
+                      },
+                      items: ['Male', 'Female']
+                          .map((sex) => DropdownMenuItem<String>(
+                                value: sex,
+                                child: Text(sex),
+                              ))
+                          .toList(),
+                      decoration: const InputDecoration(
+                        labelText: 'Sex',
+                      ),
+                    ),
+                    TextField(
+                      controller: heightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Height(cm)',
+                      ),
+                    ),
+                    TextField(
+                      controller: weightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Weight(kg)',
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: updateInformation,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.withOpacity(.9),
+                      ),
+                      child: const Text(
+                        'Update',
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => Login()),
-                        );
+                        deleteUser(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 70, 233, 255)
-                            .withOpacity(1),
+                        backgroundColor: Colors.red.withOpacity(.9),
                       ),
-                      child: const Text('Back to Login'),
+                      child: const Text('Delete Account'),
                     ),
+                    // Blur effect when userDeleted is true
+                    if (userDeleted)
+                      Container(
+                        color: Colors.black.withOpacity(0.0),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Successfully deleted the account',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Login(),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 70, 233, 255),
+                                  ),
+                                  child: const Text('Back to Login'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-            ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
