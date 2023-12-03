@@ -1,12 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:charts_flutter/flutter.dart' as charts;
-
-class BurnedCalories {
-  final String time;
-  final int calories;
-
-  BurnedCalories(this.time, this.calories);
-}
 
 void main() {
   runApp(MyApp());
@@ -16,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Activies',
       home: ActivityScreen(),
     );
   }
@@ -23,357 +19,226 @@ class MyApp extends StatelessWidget {
 
 class ActivityScreen extends StatefulWidget {
   @override
-  _ActivityScreenState createState() => _ActivityScreenState();
+  _FirebaseDataScreenState createState() => _FirebaseDataScreenState();
 }
 
-class _ActivityScreenState extends State<ActivityScreen> {
-  List<String> morningItems = [];
-  List<String> eveningItems = [];
+class _FirebaseDataScreenState extends State<ActivityScreen> {
+  List<Map<String, dynamic>> _daysData = []; // List to store days data
+  String? _selectedDay; // Currently selected day
+  String? _selectedMorningActivity; // Currently selected morning activity
+  String? _selectedAfternoonActivity; // Currently selected afternoon activity
 
   @override
   void initState() {
     super.initState();
-    updateData(selectedDay);
+    fetchData();
   }
 
-  List<charts.Series<BurnedCalories, String>> data = [
-    charts.Series<BurnedCalories, String>(
-      id: 'BurnedCalories',
-      data: [
-        BurnedCalories('6 AM', 50),
-        BurnedCalories('8 AM', 70),
-        BurnedCalories('10 AM', 30),
-        BurnedCalories('12 PM', 100),
-        BurnedCalories('2 PM', 40),
-        BurnedCalories('4 PM', 60),
-        BurnedCalories('6 PM', 80),
-      ],
-      domainFn: (BurnedCalories burned, _) => burned.time,
-      measureFn: (BurnedCalories burned, _) => burned.calories,
-      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      labelAccessorFn: (BurnedCalories burned, _) => '${burned.calories}',
-    )
-  ];
+  Future<void> fetchData() async {
+    final response = await http.get(Uri.parse(
+        'https://sara-fb2f2-default-rtdb.asia-southeast1.firebasedatabase.app/.json'));
 
-  String selectedDay = 'Mon'; // Initially selected day
+    if (response.statusCode == 200) {
+      final decodedData = json.decode(response.body);
+      if (decodedData['activity'] != null) {
+        List<dynamic> days = decodedData['activity'].values.toList();
+        setState(() {
+          _daysData = days.cast<Map<String, dynamic>>(); // Update days data
+          _selectedDay = null; // Clear selected day
+          _selectedMorningActivity = null; // Clear selected morning activity
+          _selectedAfternoonActivity =
+              null; // Clear selected afternoon activity
+        });
+      }
+    } else {
+      setState(() {
+        _daysData = []; // Clear data in case of failure
+        _selectedDay = null; // Clear selected day
+        _selectedMorningActivity = null; // Clear selected morning activity
+        _selectedAfternoonActivity = null; // Clear selected afternoon activity
+      });
+    }
+  }
+
+  Widget buildActivitiesList(String title, List<String> activities,
+      String? selectedActivity, Function(int) onTap) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        SizedBox(
+          height: 80,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: activities.length,
+            itemBuilder: (context, index) {
+              String activity = activities[index];
+              bool isSelected = activity == selectedActivity;
+
+              return GestureDetector(
+                onTap: () {}, // No action on tap
+                child: Container(
+                  width: 120,
+                  margin: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.blue : null,
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: isSelected ? Colors.blue : Colors.black,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      activity,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue.withOpacity(0.9),
-        title: const Text('This Week\'s Activity'),
+        title: Text('Activity'),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+        children: <Widget>[
           SizedBox(
             height: 50,
-            child: ListView(
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              children: [
-                for (var day in [
-                  'Mon',
-                  'Tue',
-                  'Wed',
-                  'Thu',
-                  'Fri',
-                  'Sat',
-                  'Sun'
-                ])
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedDay = day;
-                          updateData(day); // Update the graph data
-                        });
-                      },
-                      child: Chip(
-                        label: Text(day),
-                        backgroundColor: selectedDay == day
-                            ? Colors.blue
-                            : Colors.lightBlue.withOpacity(0.25),
+              itemCount: _daysData.length,
+              itemBuilder: (context, index) {
+                Map<String, dynamic> dayData = _daysData[index];
+                bool isSelected = dayData['days'] == _selectedDay;
+
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedDay = isSelected ? null : dayData['days'];
+                      _selectedMorningActivity =
+                          null; // Clear selected morning activity
+                      _selectedAfternoonActivity =
+                          null; // Clear selected afternoon activity
+                    });
+                  },
+                  child: Card(
+                    color: isSelected ? Colors.blue : null,
+                    margin: EdgeInsets.all(8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          dayData['days'],
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-              ],
+                );
+              },
             ),
           ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                Container(
-                  // Add the Text widget here
-                  child: const Text(
-                    'Burned Calories',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+          if (_selectedDay != null && _daysData.isNotEmpty)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildActivitiesList(
+                      'Morning Activity',
+                      List.generate(
+                          3,
+                          (index) => _daysData.firstWhere((day) =>
+                                  day['days'] ==
+                                  _selectedDay)['morningActivity']
+                              ['morningActivity${index + 1}']),
+                      _selectedMorningActivity,
+                      (index) {},
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8), // Adjust spacing as needed
-                Container(
-                  height: 300, // Set a fixed height for the chart
-                  child: charts.BarChart(
-                    data,
-                    animate: true,
-                    vertical: true,
-                    domainAxis: const charts.OrdinalAxisSpec(
-                      renderSpec:
-                          const charts.SmallTickRendererSpec(labelRotation: 60),
+                    buildActivitiesList(
+                      'Afternoon Activity',
+                      List.generate(
+                          3,
+                          (index) => _daysData.firstWhere((day) =>
+                                  day['days'] ==
+                                  _selectedDay)['afternoonActivity']
+                              ['afternoonActivity${index + 1}']),
+                      _selectedAfternoonActivity,
+                      (index) {},
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Morning Activity',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: morningItems
-                        .map(
-                          (item) => Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Container(
-                              width: 170,
-                              height: 80,
-                              color: Colors.grey.withOpacity(0.3),
-                              alignment: Alignment.center,
-                              child: Text(item),
+                    SizedBox(
+                      height: 350,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Burned Calories',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Afternoon Activity',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: eveningItems
-                        .map(
-                          (item) => Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Container(
-                              width: 170,
-                              height: 80,
-                              color: Colors.grey.withOpacity(0.3),
-                              alignment: Alignment.center,
-                              child: Text(item),
+                          SizedBox(height: 10),
+                          Expanded(
+                            child: charts.BarChart(
+                              [
+                                charts.Series<ChartData, String>(
+                                  id: 'Sales',
+                                  colorFn: (_, __) =>
+                                      charts.MaterialPalette.blue.shadeDefault,
+                                  domainFn: (ChartData sales, _) => sales.day,
+                                  measureFn: (ChartData sales, _) =>
+                                      sales.sales,
+                                  data: [
+                                    ChartData('Day 1', 30),
+                                    ChartData('Day 2', 50),
+                                    ChartData('Day 3', 80),
+                                    ChartData('Day 4', 20),
+                                    ChartData('Day 5', 60),
+                                    ChartData('Day 6', 70),
+                                    ChartData('Day 7', 40),
+                                  ],
+                                )
+                              ],
+                              animate: true,
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
+}
 
-  void updateData(String selectedDay) {
-    List<BurnedCalories> updatedData = [];
+class ChartData {
+  final String day;
+  final double sales;
 
-    // Replace this logic with your actual data for different days
-    if (selectedDay == 'Mon') {
-      updatedData = [
-        BurnedCalories('6 AM', 50),
-        BurnedCalories('8 AM', 70),
-        BurnedCalories('10 AM', 30),
-        BurnedCalories('12 PM', 100),
-        BurnedCalories('2 PM', 40),
-        BurnedCalories('4 PM', 60),
-        BurnedCalories('6 PM', 80),
-      ];
-    } else if (selectedDay == 'Tue') {
-      updatedData = [
-        BurnedCalories('6 AM', 60),
-        BurnedCalories('8 AM', 80),
-        BurnedCalories('10 AM', 40),
-        BurnedCalories('12 PM', 100),
-        BurnedCalories('2 PM', 50),
-        BurnedCalories('4 PM', 70),
-        BurnedCalories('6 PM', 90),
-      ];
-    } else if (selectedDay == 'Wed') {
-      updatedData = [
-        BurnedCalories('6 AM', 30),
-        BurnedCalories('8 AM', 70),
-        BurnedCalories('10 AM', 50),
-        BurnedCalories('12 PM', 90),
-        BurnedCalories('2 PM', 100),
-        BurnedCalories('4 PM', 40),
-        BurnedCalories('6 PM', 30),
-      ];
-    } else if (selectedDay == 'Thu') {
-      updatedData = [
-        BurnedCalories('6 AM', 70),
-        BurnedCalories('8 AM', 80),
-        BurnedCalories('10 AM', 50),
-        BurnedCalories('12 PM', 100),
-        BurnedCalories('2 PM', 80),
-        BurnedCalories('4 PM', 50),
-        BurnedCalories('6 PM', 60),
-      ];
-    } else if (selectedDay == 'Fri') {
-      updatedData = [
-        BurnedCalories('6 AM', 70),
-        BurnedCalories('8 AM', 80),
-        BurnedCalories('10 AM', 90),
-        BurnedCalories('12 PM', 40),
-        BurnedCalories('2 PM', 100),
-        BurnedCalories('4 PM', 30),
-        BurnedCalories('6 PM', 50),
-      ];
-    } else if (selectedDay == 'Sat') {
-      updatedData = [
-        BurnedCalories('6 AM', 20),
-        BurnedCalories('8 AM', 60),
-        BurnedCalories('10 AM', 100),
-        BurnedCalories('12 PM', 80),
-        BurnedCalories('2 PM', 60),
-        BurnedCalories('4 PM', 50),
-        BurnedCalories('6 PM', 70),
-      ];
-    } else if (selectedDay == 'Sun') {
-      updatedData = [
-        BurnedCalories('6 AM', 20),
-        BurnedCalories('8 AM', 60),
-        BurnedCalories('10 AM', 100),
-        BurnedCalories('12 PM', 40),
-        BurnedCalories('2 PM', 70),
-        BurnedCalories('4 PM', 40),
-        BurnedCalories('6 PM', 50),
-      ];
-    }
-
-    if (selectedDay == 'Mon') {
-      morningItems = [
-        'Monday Activity 1',
-        'Monday Activity 2',
-        'Monday Activity 3'
-      ];
-      eveningItems = [
-        'Monday Activity 1',
-        'Monday Activity 2',
-        'Monday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Tue') {
-      morningItems = [
-        'Tuesday Activity 1',
-        'Tuesday Activity 2',
-        'Tuesday Activity 3'
-      ];
-      eveningItems = [
-        'Tuesday Activity 1',
-        'Tuesday Activity 2',
-        'Tuesday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Wed') {
-      morningItems = [
-        'Wednesday Activity 1',
-        'Wednesday Activity 2',
-        'Wednesday Activity 3'
-      ];
-      eveningItems = [
-        'Wednesday Activity 1',
-        'Wednesday Activity 2',
-        'Wednesday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Thu') {
-      morningItems = [
-        'Thursday Activity 1',
-        'Thursday Activity 2',
-        'Thursday Activity 3'
-      ];
-      eveningItems = [
-        'Thursday Activity 1',
-        'Thursday Activity 2',
-        'Thursday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Fri') {
-      morningItems = [
-        'Friday Activity 1',
-        'Friday Activity 2',
-        'Friday Activity 3'
-      ];
-      eveningItems = [
-        'Friday Activity 1',
-        'Friday Activity 2',
-        'Friday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Sat') {
-      morningItems = [
-        'Saturday Activity 1',
-        'Saturday Activity 2',
-        'Saturday Activity 3'
-      ];
-      eveningItems = [
-        'Saturday Activity 1',
-        'Saturday Activity 2',
-        'Saturday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    } else if (selectedDay == 'Sun') {
-      morningItems = [
-        'Sunday Activity 1',
-        'Sunday Activity 2',
-        'Sunday Activity 3'
-      ];
-      eveningItems = [
-        'Sunday Activity 1',
-        'Sunday Activity 2',
-        'Sunday Activity 3'
-      ];
-      // Update your chart data accordingly
-      // ...
-    }
-    // Repeat the same for other days...
-
-    setState(() {
-      data = [
-        charts.Series<BurnedCalories, String>(
-          id: 'BurnedCalories',
-          data: updatedData,
-          domainFn: (BurnedCalories burned, _) => burned.time,
-          measureFn: (BurnedCalories burned, _) => burned.calories,
-          colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-          labelAccessorFn: (BurnedCalories burned, _) => '${burned.calories}',
-        )
-      ];
-    });
-  }
+  ChartData(this.day, this.sales);
 }
