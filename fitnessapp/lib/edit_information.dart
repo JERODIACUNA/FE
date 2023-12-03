@@ -144,6 +144,18 @@ class _EditInformationState extends State<EditInformation> {
                       labelText: 'Age',
                     ),
                   ),
+                  TextField(
+                    controller: heightController,
+                    decoration: const InputDecoration(
+                      labelText: 'Height(cm)',
+                    ),
+                  ),
+                  TextField(
+                    controller: weightController,
+                    decoration: const InputDecoration(
+                      labelText: 'Weight(kg)',
+                    ),
+                  ),
                   DropdownButtonFormField<String>(
                     value: selectedSex,
                     onChanged: (newValue) {
@@ -159,18 +171,6 @@ class _EditInformationState extends State<EditInformation> {
                         .toList(),
                     decoration: const InputDecoration(
                       labelText: 'Sex',
-                    ),
-                  ),
-                  TextField(
-                    controller: heightController,
-                    decoration: const InputDecoration(
-                      labelText: 'Height(cm)',
-                    ),
-                  ),
-                  TextField(
-                    controller: weightController,
-                    decoration: const InputDecoration(
-                      labelText: 'Weight(kg)',
                     ),
                   ),
                   ElevatedButton(
